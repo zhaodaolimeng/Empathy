@@ -3,12 +3,46 @@ import re
 import math
 import numpy as np
 import jieba
+import pynlpir
+
+replace_dict = {
+    '【': '[', '】': ']',
+    '（': '(', '）': ')',
+    '。  ': '。', '？  ': '?'
+}
+
+# reverse_replace_dict = {v: k for k, v in replace_dict}
+
+
+def strQ2B(ustring):
+    """
+    全半角转换
+    :param ustring:
+    :return:
+    """
+    rstring = ''
+    skip_char = set([ord(c) for c in ['，', '：']])
+    for uchar in ustring:
+        inside_code = ord(uchar)
+        if inside_code not in skip_char:
+            if inside_code == 12288:
+                inside_code = 32
+            elif 65281 <= inside_code <= 65374:
+                inside_code -= 65248
+        rstring += chr(inside_code)
+    return rstring
 
 
 def word_tokenize(sent):
-    # doc = nlp(sent)
-    # return [token.text for token in doc]
-    return list(jieba.cut(sent))
+    sent = strQ2B(sent)
+    for target, replacement in replace_dict.items():
+        sent = sent.replace(target, replacement)
+    try:
+        pairs = pynlpir.segment(sent)
+        words = [w for w, _ in pairs]
+    except:
+        words = jieba.cut(sent)
+    return words
 
 
 def convert_idx(text, tokens):

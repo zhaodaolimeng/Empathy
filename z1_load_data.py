@@ -2,6 +2,7 @@ import os
 import tensorflow as tf
 import random
 import jieba
+import pynlpir
 import ujson as json
 import numpy as np
 from codecs import open
@@ -34,6 +35,7 @@ def process_file(filename, data_type, word_counter, char_counter, ques_limit):
 
     with open(filename, "r") as fh:
         source = json.load(fh)
+        # TODO 预处理中进行了过滤，但后续没有办法计算spans
         for article in tqdm(source):
             content = article['article_title'] + '。' + article['article_content']
             content_tokens = word_tokenize(content)
@@ -267,12 +269,16 @@ if __name__ == "__main__":
     config = flags.FLAGS
     home = os.getcwd()
 
+    pynlpir.open()
+    jieba.initialize()
+
     # 原始数据
-    train_file = os.path.join(home, "datasets", "zh", "train.json")
-    dev_file = os.path.join(home, "datasets", "zh", "dev.json")
+    train_file = os.path.join(home, "datasets", "train.json")
+    dev_file = os.path.join(home, "datasets", "dev.json")
     flags.DEFINE_string("train_file", train_file, "Train source file")
     flags.DEFINE_string("dev_file", dev_file, "Dev source file")
-    fasttext_file = os.path.join(home, "datasets", "fasttext", "wiki.zh.vec")
+    # fasttext_file = os.path.join(home, "datasets", "fasttext", "wiki.zh.vec")
+    fasttext_file = os.path.join(home, "datasets", "word_vector_result.vec")
     flags.DEFINE_string("fasttext_file", fasttext_file, "Fasttext word embedding source file")
 
     # 目标数据

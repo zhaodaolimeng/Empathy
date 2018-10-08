@@ -99,8 +99,8 @@ def get_answer(content, question, session, model, word_dictionary, char_dictiona
         yp1, yp2 = session.run([model.yp1, model.yp2], feed_dict=fd)
         yp2[0] += 1
         return "".join(content_tokenized[yp1[0]:yp2[0]])
-    except ValueError:
-        print("ValueError triggered!")
+    except:
+        print("Error triggered!")
         return None
 
 
@@ -166,7 +166,7 @@ if __name__ == '__main__':
                 sess.run(model.assign_vars)
 
                 odata = []
-                bleu_eval, rough_eval = Bleu(), RougeL()
+                # bleu_eval, rough_eval = Bleu(), RougeL()
                 for a in tqdm(jdata):
                     aid = a['article_id']
                     content = a['article_title'] + a['article_content']
@@ -176,15 +176,15 @@ if __name__ == '__main__':
                         answer = get_answer(content, question, sess, model,
                                             word_dictionary, char_dictionary, config)
                         o_question.append({
-                            'question_id': int(q['questions_id']),
+                            'questions_id': q['questions_id'],
                             'answer': answer
                         })
-                        bleu_eval.add_inst(answer, q['answer'])
-                        rough_eval.add_inst(answer, q['answer'])
+                        # bleu_eval.add_inst(answer, q['answer'])
+                        # rough_eval.add_inst(answer, q['answer'])
                     odata.append({
-                        'articles_id': aid,
+                        'article_id': aid,
                         'questions': o_question
                     })
-                print("Bleu = {}, RoughL = {}".format(bleu_eval.get_score(), rough_eval.get_score()))
+                # print("Bleu = {}, RoughL = {}".format(bleu_eval.get_score(), rough_eval.get_score()))
                 with open(config.eval_output_file, 'w') as outfile:
                     json.dump(odata, outfile, ensure_ascii=False)
